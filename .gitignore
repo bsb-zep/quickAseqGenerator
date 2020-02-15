@@ -1,0 +1,5 @@
+00_Outbox
+bvCache
+__pycache__
+*.log
+queue-*.bvid
