@@ -47,6 +47,7 @@ with open('queue-inbox.bvid', 'r') as queue:
         if len(bvId) == 0:
             continue
         print('')
+        print(bvId)
         if bvId[0] == '#':
             logError(bvId + ' <- this is a comment')
             continue

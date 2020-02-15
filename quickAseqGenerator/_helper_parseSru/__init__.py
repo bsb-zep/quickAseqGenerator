@@ -1,14 +1,28 @@
 import requests
 from lxml import etree
+import datetime
 
 # module settings
 # TODO move to global config
 bvbrSruUrl = 'http://bvbr.bib-bvb.de:5661/bvb01sru?version=1.1&recordSchema=marcxml&operation=searchRetrieve&maximumRecords=1&query=marcxml.idn='
 
+def getTimestamp():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def logError(logLine):
+    with open('error.log', 'a') as logfileDao:
+        logfileDao.write(logLine + ' ' + getTimestamp() + '\n')
+    print('line added to error log')
+
 def go(bvId):
 
     # query single dataset response from oai api
-    sruResponse = requests.get(bvbrSruUrl + bvId)
+    try:
+        sruResponse = requests.get(bvbrSruUrl + bvId)
+    except requests.exceptions.RequestException as e:
+        logError('connection error: ' + str(e) + ' at' )
+        return False
+
     sruDao = etree.fromstring(sruResponse.text.encode('utf-8'))
 
     # loop through leader, control fields and datafield

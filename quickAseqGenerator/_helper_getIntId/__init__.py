@@ -1,14 +1,28 @@
 import requests
 from lxml import etree
+import datetime
 
 # module settings
 # TODO move to global config
 bvbrOaiUrl = 'http://bvbr.bib-bvb.de:8991/aleph-cgi/oai/oai_opendata.pl?verb=GetRecord&metadataPrefix=marc21&identifier='
 
+def getTimestamp():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def logError(logLine):
+    with open('error.log', 'a') as logfileDao:
+        logfileDao.write(logLine + ' ' + getTimestamp() + '\n')
+    print('line added to error log')
+
 def go(bvId):
 
     # query single dataset response from oai api
-    oaiResponse = requests.get(bvbrOaiUrl + bvId)
+    try:
+        oaiResponse = requests.get(bvbrOaiUrl + bvId)
+    except requests.exceptions.RequestException as e:
+        logError('connection error: ' + str(e) + ' at' )
+        return False
+
     oaiDao = etree.fromstring(oaiResponse.text.encode('utf-8'))
 
     # loop through leader, control fields and datafield
