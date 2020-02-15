@@ -1,6 +1,7 @@
 import requests
 from lxml import etree
 import datetime
+import time
 
 # module settings
 # TODO move to global config
@@ -21,6 +22,7 @@ def go(bvId):
         oaiResponse = requests.get(bvbrOaiUrl + bvId)
     except requests.exceptions.RequestException as e:
         logError('connection error: ' + str(e) + ' at' )
+        time.sleep(3)
         return False
 
     oaiDao = etree.fromstring(oaiResponse.text.encode('utf-8'))
