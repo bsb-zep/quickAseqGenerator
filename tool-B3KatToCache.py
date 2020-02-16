@@ -39,15 +39,20 @@ def go(bvId):
     return True
 
 
+# prepare loop objects
 queueArray = list()
 keepForNext = list()
+
+# handle queue
 with open('queue-inbox.bvid', 'r') as queue:
     for bvId in queue.readlines():
+        # cleanup string
         bvId = bvId.lstrip().rstrip()
         if len(bvId) == 0:
             continue
         print('')
         print(bvId)
+        # handle invalid lines
         if bvId[0] == '#':
             logError(bvId + ' <- this is a comment')
             continue
@@ -60,7 +65,6 @@ with open('queue-inbox.bvid', 'r') as queue:
         if bvId[2:].isdigit() == False:
             logError(bvId + ' not only digits after prefix')
             continue
-        # TODO validate BVID formally before trying to process
         processingSucess = go(bvId)
         if processingSucess == True:
             with open('queue-processed.bvid', 'a') as processedQueue:
@@ -70,3 +74,7 @@ with open('queue-inbox.bvid', 'r') as queue:
         else:
             with open('queue-rescheduled.bvid', 'a') as processedQueue:
                 processedQueue.write(bvId + '\n')
+
+# reset inbox queue file after reset
+with open('queue-inbox.bvid', 'w') as queue:
+    queue.write('')
