@@ -2,6 +2,7 @@
 import json
 import datetime
 import sys
+import os
 
 # import custom library
 import quickAseqGenerator
@@ -13,7 +14,10 @@ import quickAseqGenerator
 inputFileName = sys.argv[1]
 
 # get switch for empty queue file after batch
-cleanupQueueAfter = sys.argv[2]
+if sys.argv[2] == 'nodel':
+    cleanupQueueAfter = False
+elif sys.argv[2] == 'dodel':
+    cleanupQueueAfter = True
 
 def getTimestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -51,6 +55,10 @@ def go(bvId):
     # signal successful processing to batch handler
     return True
 
+
+# set blockfile
+with open('blockfile', 'w') as blockfileDao:
+    blockfileDao.write('!?')
 
 # prepare loop objects
 queueArray = list()
@@ -92,3 +100,5 @@ with open(inputFileName, 'r') as queue:
 if cleanupQueueAfter:
     with open(inputFileName, 'w') as queue:
         queue.write('')
+
+os.remove('blockfile')
