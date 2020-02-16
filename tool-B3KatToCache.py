@@ -1,6 +1,19 @@
-import quickAseqGenerator
+# import default libraries
 import json
 import datetime
+import sys
+
+# import custom library
+import quickAseqGenerator
+
+# TODO syntax check at begin
+# TODO add help info like proper cli
+
+# get filename from prompt
+inputFileName = sys.argv[1]
+
+# get switch for empty queue file after batch
+cleanupQueueAfter = sys.argv[2]
 
 def getTimestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -44,7 +57,7 @@ queueArray = list()
 keepForNext = list()
 
 # handle queue
-with open('queue-inbox.bvid', 'r') as queue:
+with open(inputFileName, 'r') as queue:
     for bvId in queue.readlines():
         # cleanup string
         bvId = bvId.lstrip().rstrip()
@@ -75,6 +88,7 @@ with open('queue-inbox.bvid', 'r') as queue:
             with open('queue-rescheduled.bvid', 'a') as processedQueue:
                 processedQueue.write(bvId + '\n')
 
-# reset inbox queue file after reset
-with open('queue-inbox.bvid', 'w') as queue:
-    queue.write('')
+# reset inbox queue file if switch
+if cleanupQueueAfter:
+    with open(inputFileName, 'w') as queue:
+        queue.write('')
