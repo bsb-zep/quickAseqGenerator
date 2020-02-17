@@ -3,3 +3,4 @@ bvCache
 __pycache__
 *.log
 queue-*.bvid
+jobs
