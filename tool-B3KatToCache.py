@@ -3,6 +3,7 @@ import json
 import datetime
 import sys
 import os
+import re
 
 # import custom library
 import quickAseqGenerator
@@ -12,6 +13,7 @@ import quickAseqGenerator
 
 # get filename from prompt
 inputFileName = sys.argv[1]
+blockfileName = 'block--' + re.sub(r'\W+', '', inputFileName)
 
 # get switch for empty queue file after batch
 if sys.argv[2] == 'nodel':
@@ -57,7 +59,7 @@ def go(bvId):
 
 
 # set blockfile
-with open('blockfile', 'w') as blockfileDao:
+with open(blockfileName, 'w') as blockfileDao:
     blockfileDao.write('!?')
 
 # prepare loop objects
@@ -101,4 +103,4 @@ if cleanupQueueAfter:
     with open(inputFileName, 'w') as queue:
         queue.write('')
 
-os.remove('blockfile')
+os.remove(blockfileName)
