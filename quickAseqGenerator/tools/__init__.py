@@ -25,10 +25,19 @@ def aseqFromCache(argvDao):
         if tagStr not in cacheResponse['tagged']:
             aseqLine += cacheResponse['sysId'] + ' 078' + tagType + '  L $$a'
             aseqLine += tagStr
-            with open('jobs/' + jobId + '.aseq', 'a') as jobOutfile:
-                jobOutfile.write(aseqLine + '\n')
-            logError(bvId + ' will get "$' + tagType + ' ' + tagStr + '", as of')
-            return True
+            if 5 in argvDao.keys():
+                logError(bvId + ' will get "$' + tagType + ' ' + tagStr + '" as requested by job "' + argvDao[5] + '", as of')
+            else:
+                logError(bvId + ' will get "$' + tagType + ' ' + tagStr + '", as of')
+            if jobId == 'pythonReturn':
+                return aseqLine
+            else:
+                with open('jobs/' + jobId + '.aseq', 'a') as jobOutfile:
+                    jobOutfile.write(aseqLine + '\n')
+                return True
         else:
-            logError(bvId + ' already has "' + tagStr + '" as ' + tagType + ' tag, no aseq line')
+            if 5 in argvDao.keys():
+                logError(bvId + ' already has "' + tagStr + '" as ' + tagType + ' tag as requested by job "' + argvDao[5] + '", no aseq line created')    
+            else:
+                logError(bvId + ' already has "$' + tagType + ' ' + tagStr + '", no aseq line created')
             return False
