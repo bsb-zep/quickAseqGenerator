@@ -52,7 +52,7 @@ After you have succesfully completed this process, you can use the workflow as d
     - Collect all BV IDs that you whish to enrich with a ``ASEQ 078n`` or ``ASEQ 078q`` field in a list file, using plain text and one BV ID per line. All BV IDs must have been cached before.
     - Apply cli-batchAseqFromCache.py as described below. As this operation uses the cached state of the B3Kat datasets, you will not need an internet connection for this.
      
-            python cli-batchAseqFromCache.py [input filename] [n/q] [new field value] [job description]
+            python tool-batchAseqFromCache.py [input filename] [n/q] [new field value] [job description]
         
         This means: All BV IDs from the file specified by ``[input filename]`` will receive a 078 ``[n/q]`` field with the string contents ``[new field value]``. Any log lines and the resulting ASEQ file name will contain the ``[[job description]``.
 
