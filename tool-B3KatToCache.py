@@ -41,12 +41,19 @@ def go(bvId):
     if presentTags == False:
         logError(bvId + ': bad sru answer at')
         return False
+    
+    # get present LOWs
+    presentLows = quickAseqGenerator._helper_getLows.go(bvId)
+    if presentLows == False:
+        logError(bvId + ': bad sru answer at')
+        return False
 
     # create json cache entry
     cacheEntry = dict()
     cacheEntry['bvId'] = bvId
     cacheEntry['sysId'] = sysId
     cacheEntry['tagged'] = presentTags
+    cacheEntry['holdings'] = presentLows
     cacheEntry['asOf'] = str(datetime.datetime.now())
     cacheLine = json.dumps(cacheEntry, indent=3)
     print(cacheLine)
