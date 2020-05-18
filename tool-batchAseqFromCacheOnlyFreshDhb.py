@@ -49,8 +49,11 @@ def go(bvId):
     argvDao[5] = jobId
 
     cacheResponse = quickAseqGenerator._helper_cacheManager.getFromCache(bvId)
+    if cacheResponse == False:
+        logError(bvId + ' is not in cache, skipping')
+        return False
     if 'DHB' in cacheResponse['tagged']:
-        logError(bvId + 'is already tagged 078n $aDHB, so no new 078q added in onlyFresh mode')
+        logError(bvId + ' already has 078n $aDHB, no new 078q added in onlyFresh mode although requested by job ' + str(jobId))
     else:
         aseqLine = quickAseqGenerator.tools.aseqFromCache(argvDao)
         if aseqLine != False:
