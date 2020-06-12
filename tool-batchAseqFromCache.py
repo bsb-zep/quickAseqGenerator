@@ -22,8 +22,8 @@ import quickAseqGenerator
 inputFileName = sys.argv[1]
 blockfileName = 'block--' + re.sub(r'\W+', '', inputFileName)
 
-tagType = sys.argv[2]
-tagStr = sys.argv[3]
+tagLetter = sys.argv[2]
+tagContent = sys.argv[3]
 jobId = sys.argv[4]
 
 # get switch for empty queue file after batch
@@ -38,19 +38,17 @@ def getTimestamp():
 def logError(logLine):
     with open('error.log', 'a') as logfileDao:
         logfileDao.write(logLine + ' ' + getTimestamp() + '\n')
-    print('line added to error log')
 
 def go(bvId):
-    argvDao = dict()
-    argvDao[1] = bvId
-    argvDao[2] = tagType
-    argvDao[3] = tagStr
-    argvDao[4] = 'pythonReturn'
-    argvDao[5] = jobId
-    aseqLine = quickAseqGenerator.tools.aseqFromCache(argvDao)
-    if isinstance(aseqLine, str):
+    lineParameters = dict()
+    lineParameters['bvId'] = bvId
+    lineParameters['tagLetter'] = tagLetter
+    lineParameters['tagContent'] = tagContent
+    lineParameters['jobId'] = jobId
+    generatedLine = quickAseqGenerator.tools.aseqFromCache(lineParameters)
+    if isinstance(generatedLine, str):
         with open('jobs/' + jobId + '.aseq', 'a') as jobOutfile:
-            jobOutfile.write(aseqLine + '\n')
+            jobOutfile.write(generatedLine + '\n')
 
 
 # set blockfile
@@ -67,21 +65,18 @@ with open(inputFileName, 'r') as queue:
     for bvId in queue.readlines():
         # cleanup string
         bvId = bvId.lstrip().rstrip()
-        if len(bvId) == 0:
+        if len(bvId) == 0: # skip empty lines
             continue
         # handle invalid lines
-        if bvId[0] == '#':
-            logError(bvId + ' <- this is a comment')
+        if bvId[0] == '#': # comment
             continue
-        if len(bvId) != 11:
-            logError(bvId + ' has invalid length')
+        if len(bvId) != 11: # invalid length of BV id
             continue
-        if bvId[0:2] != 'BV':
-            logError(bvId + ' has no BV prefix')
+        if bvId[0:2] != 'BV': # missing BV prefix
             continue
-        if bvId[2:].isdigit() == False:
-            logError(bvId + ' not only digits after prefix')
+        if bvId[2:].isdigit() == False: # not numerical after prefix
             continue
         go(bvId)
 
+# remove blockfile
 os.remove(blockfileName)
