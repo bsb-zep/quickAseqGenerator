@@ -1,7 +1,3 @@
-import quickAseqGenerator
-import sys
-
-
 # import default libraries
 import json
 import datetime
@@ -13,10 +9,7 @@ import re
 import quickAseqGenerator
 
 # run from repo root
-# python cli-batchAseqFromCache.py [input filename] [n/q] [new field value] [job description]
-
-# TODO syntax check at begin
-# TODO add help info like proper cli
+# python tool-batchAseqFromCache.py [input filename] [n/q] [new field value] [job description]
 
 # get filename from prompt
 inputFileName = sys.argv[1]
@@ -40,12 +33,18 @@ def logError(logLine):
         logfileDao.write(logLine + ' ' + getTimestamp() + '\n')
 
 def go(bvId):
+
+    # pack parameter dictionary
     lineParameters = dict()
     lineParameters['bvId'] = bvId
     lineParameters['tagLetter'] = tagLetter
     lineParameters['tagContent'] = tagContent
     lineParameters['jobId'] = jobId
+
+    # call aseq line generator
     generatedLine = quickAseqGenerator.tools.aseqFromCache(lineParameters)
+
+    # if generator returns string, write to file
     if isinstance(generatedLine, str):
         with open('jobs/' + jobId + '.aseq', 'a') as jobOutfile:
             jobOutfile.write(generatedLine + '\n')
