@@ -13,5 +13,4 @@ def getFromCache(bvId):
             cacheContent = json.load(cacheEntryDao)
         return cacheContent
     except FileNotFoundError:
-        print(bvId + ': bvId not in cache')
-        return False
+        return 'notInCache'

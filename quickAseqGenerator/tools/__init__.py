@@ -19,8 +19,8 @@ def aseqFromCache(argvDao):
 
     cacheResponse = quickAseqGenerator._helper_cacheManager.getFromCache(bvId)
     aseqLine = str()
-    if cacheResponse == False:
-        logError(bvId + ' returned cache error')
+    if cacheResponse == 'notInCache':
+        logError(bvId + ' was not found in cache')
     else:
         if tagStr not in cacheResponse['tagged']:
             aseqLine += cacheResponse['sysId'] + ' 078' + tagType + '  L $$a'

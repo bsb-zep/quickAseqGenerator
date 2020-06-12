@@ -48,7 +48,7 @@ def go(bvId):
     argvDao[4] = 'pythonReturn'
     argvDao[5] = jobId
     aseqLine = quickAseqGenerator.tools.aseqFromCache(argvDao)
-    if aseqLine != False:
+    if isinstance(aseqLine, str):
         with open('jobs/' + jobId + '.aseq', 'a') as jobOutfile:
             jobOutfile.write(aseqLine + '\n')
 
