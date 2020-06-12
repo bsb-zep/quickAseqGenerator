@@ -3,41 +3,47 @@ import quickAseqGenerator
 import datetime
 import sys
 
-
+# create timestamp
 def getTimestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+# write log line with timestamp
 def logError(logLine):
     with open('error.log', 'a') as logfileDao:
         logfileDao.write(logLine + ' ' + getTimestamp() + '\n')
 
-def aseqFromCache(argvDao):
-    bvId = argvDao[1]
-    tagType = argvDao[2]
-    tagStr = argvDao[3]
-    jobId = argvDao[4]
+# handle aseq enrichment line generation from cache
+def aseqFromCache(lineParameters):
 
-    cacheResponse = quickAseqGenerator._helper_cacheManager.getFromCache(bvId)
-    aseqLine = str()
+    # load cache data for lineParameters['bvId']
+    cacheResponse = quickAseqGenerator._helper_cacheManager.getFromCache(lineParameters['bvId'])
     if cacheResponse == 'notInCache':
-        logError(bvId + ' was not found in cache')
+        logError('[CCHERR] ' + lineParameters['bvId'] + ' was not found in cache')
+        return False
+
+    # prepare string object for aseq line
+    aseqLine = str()
+
+    # check whether desired tag is already present in dataset
+    if lineParameters['tagContent'] not in cacheResponse['tagged']:
+
+        # if tag is not yet applied, write line
+        aseqLine += cacheResponse['sysId'] + ' 078' + lineParameters['tagLetter'] + '  L $$a'
+        aseqLine += lineParameters['tagContent']
+
+        # write log line for enrichment
+        logError('[ENRICH] ' + lineParameters['bvId'] + 
+                 ' will get "$' + lineParameters['tagLetter'] + 
+                 ' ' + lineParameters['tagContent'] + 
+                 '" as requested by job "' + lineParameters['jobId'] + '", as of')
+
+        return aseqLine
+
     else:
-        if tagStr not in cacheResponse['tagged']:
-            aseqLine += cacheResponse['sysId'] + ' 078' + tagType + '  L $$a'
-            aseqLine += tagStr
-            if 5 in argvDao.keys():
-                logError(bvId + ' will get "$' + tagType + ' ' + tagStr + '" as requested by job "' + argvDao[5] + '", as of')
-            else:
-                logError(bvId + ' will get "$' + tagType + ' ' + tagStr + '", as of')
-            if jobId == 'pythonReturn':
-                return aseqLine
-            else:
-                with open('jobs/' + jobId + '.aseq', 'a') as jobOutfile:
-                    jobOutfile.write(aseqLine + '\n')
-                return True
-        else:
-            if 5 in argvDao.keys():
-                logError(bvId + ' already has "' + tagStr + '" as ' + tagType + ' tag as requested by job "' + argvDao[5] + '", no aseq line created')    
-            else:
-                logError(bvId + ' already has "$' + tagType + ' ' + tagStr + '", no aseq line created')
-            return False
+
+        # if tag is already applied
+        logError('[PRESNT] ' + lineParameters['bvId'] + ' already has "' +
+                 lineParameters['tagContent'] + '" as ' +
+                 lineParameters['tagLetter'] + ' tag as requested by job "' +
+                 lineParameters['jobId'] + '", no aseq line created')    
+        return False
