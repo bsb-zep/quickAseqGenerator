@@ -24,6 +24,12 @@ def aseqFromCache(lineParameters):
     # prepare string object for aseq line
     aseqLine = str()
 
+    # check present tags for DHB_DEL
+    for tag in cacheResponse['tagged']:
+        if 'DHB_DEL'.lower() in tag.lower():
+            print('negative tag DHB_DEL* found in ' + lineParameters['bvId'])
+            return False
+
     # check whether desired tag is already present in dataset
     if lineParameters['tagContent'] not in cacheResponse['tagged']:
 
