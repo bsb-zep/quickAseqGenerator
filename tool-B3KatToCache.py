@@ -61,10 +61,10 @@ inputFileName = sys.argv[1]
 blockfileName = 'block--' + re.sub(r'\W+', '', inputFileName)
 
 # get switch for empty queue file after batch
-if sys.argv[2] == 'nodel':
-    cleanupQueueAfter = False
-elif sys.argv[2] == 'dodel':
+if  sys.argv[2] == 'dodel':
     cleanupQueueAfter = True
+else:
+    cleanupQueueAfter = False
 
 # get number of parallel queries, use 1 of none set
 if len(sys.argv) == 4:
