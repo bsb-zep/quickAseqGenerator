@@ -5,3 +5,6 @@ __pycache__
 queue-*.bvid
 jobs
 block--*
+.vscode
+venv
+*.aseq*
