@@ -8,6 +8,9 @@ import re
 # import custom library
 import quickAseqGenerator
 
+# import parallel queue handler
+from pymultiprocwrapper.pyMultiprocWrapper import pyMultiprocWrapper as mwprototype
+
 # TODO syntax check at begin
 # TODO add help info like proper cli
 
@@ -27,7 +30,6 @@ def getTimestamp():
 def logError(logLine):
     with open('error.log', 'a') as logfileDao:
         logfileDao.write(logLine + ' ' + getTimestamp() + '\n')
-    print('line added to error log')
 
 def go(bvId):
     # get sysid
@@ -56,7 +58,6 @@ def go(bvId):
     cacheEntry['holdings'] = presentLows
     cacheEntry['asOf'] = str(datetime.datetime.now())
     cacheLine = json.dumps(cacheEntry, indent=3)
-    print(cacheLine)
 
     # write to cache
     quickAseqGenerator._helper_cacheManager.writeCacheEntry(bvId, cacheLine)
@@ -65,49 +66,59 @@ def go(bvId):
     return True
 
 
-# set blockfile
-with open(blockfileName, 'w') as blockfileDao:
-    blockfileDao.write('!?')
+# # set blockfile
+# with open(blockfileName, 'w') as blockfileDao:
+#     blockfileDao.write('!?')
 
 # prepare loop objects
 queueArray = list()
 keepForNext = list()
 
 # handle queue
-with open(inputFileName, 'r') as queue:
-    for bvId in queue.readlines():
-        # cleanup string
-        bvId = bvId.lstrip().rstrip()
-        if len(bvId) == 0:
-            continue
-        print('')
-        print(bvId)
-        # handle invalid lines
-        if bvId[0] == '#':
-            logError(bvId + ' <- this is a comment')
-            continue
-        if len(bvId) != 11:
-            logError(bvId + ' has invalid length')
-            continue
-        if bvId[0:2] != 'BV':
-            logError(bvId + ' has no BV prefix')
-            continue
-        if bvId[2:].isdigit() == False:
-            logError(bvId + ' not only digits after prefix')
-            continue
-        processingSucess = go(bvId)
-        if processingSucess == True:
-            with open('queue-processed.bvid', 'a') as processedQueue:
-                processedQueue.write(bvId + '\n')
-            with open('cache.log', 'a') as logfileDao:
-                logfileDao.write(bvId + ' cached at ' + getTimestamp() + '\n')
-        else:
-            with open('queue-rescheduled.bvid', 'a') as processedQueue:
-                processedQueue.write(bvId + '\n')
+queue = list()
+with open(inputFileName, 'r') as queueFile:
+    for bvId in queueFile.readlines():
+        queue.append(bvId)
 
-# reset inbox queue file if switch
-if cleanupQueueAfter:
-    with open(inputFileName, 'w') as queue:
-        queue.write('')
+# function to run on every item in queue
+def handleSingleBvid(bvId):
+    # cleanup string
+    bvId = bvId.lstrip().rstrip()
+    if len(bvId) == 0:
+        return False
+    # handle invalid lines
+    if bvId[0] == '#':
+        logError(bvId + ' <- this is a comment')
+        return False
+    if len(bvId) != 11:
+        logError(bvId + ' has invalid length')
+        return False
+    if bvId[0:2] != 'BV':
+        logError(bvId + ' has no BV prefix')
+        return False
+    if bvId[2:].isdigit() == False:
+        logError(bvId + ' not only digits after prefix')
+        return False
+    processingSucess = go(bvId)
+    if processingSucess == True:
+        with open('queue-processed.bvid', 'a') as processedQueue:
+            processedQueue.write(bvId + '\n')
+        with open('cache.log', 'a') as logfileDao:
+            logfileDao.write(bvId + ' cached at ' + getTimestamp() + '\n')
+    else:
+        with open('queue-rescheduled.bvid', 'a') as processedQueue:
+            processedQueue.write(bvId + '\n')
 
-os.remove(blockfileName)
+if __name__ == '__main__':
+    mw = mwprototype()
+    mw.registerQueue(queue)
+    mw.setParallelLimit(7)
+    mw.registerFunction(handleSingleBvid )
+    mw.launch()
+
+# # reset inbox queue file if switch
+# if cleanupQueueAfter:
+#     with open(inputFileName, 'w') as queue:
+#         queue.write('')
+
+# os.remove(blockfileName)
