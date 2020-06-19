@@ -11,19 +11,6 @@ import quickAseqGenerator
 # import parallel queue handler
 from pymultiprocwrapper.pyMultiprocWrapper import pyMultiprocWrapper as mwprototype
 
-# TODO syntax check at begin
-# TODO add help info like proper cli
-
-# get filename from prompt
-inputFileName = sys.argv[1]
-blockfileName = 'block--' + re.sub(r'\W+', '', inputFileName)
-
-# get switch for empty queue file after batch
-if sys.argv[2] == 'nodel':
-    cleanupQueueAfter = False
-elif sys.argv[2] == 'dodel':
-    cleanupQueueAfter = True
-
 def getTimestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -66,9 +53,24 @@ def go(bvId):
     return True
 
 
-# # set blockfile
-# with open(blockfileName, 'w') as blockfileDao:
-#     blockfileDao.write('!?')
+# TODO syntax check at begin
+# TODO add help info like proper cli
+
+# get filename from prompt
+inputFileName = sys.argv[1]
+blockfileName = 'block--' + re.sub(r'\W+', '', inputFileName)
+
+# get switch for empty queue file after batch
+if sys.argv[2] == 'nodel':
+    cleanupQueueAfter = False
+elif sys.argv[2] == 'dodel':
+    cleanupQueueAfter = True
+
+# get number of parallel queries, use 1 of none set
+if len(sys.argv) == 4:
+    parallelJobsLimit = int(sys.argv[3])
+else:
+    parallelJobsLimit = 1
 
 # prepare loop objects
 queueArray = list()
@@ -112,13 +114,11 @@ def handleSingleBvid(bvId):
 if __name__ == '__main__':
     mw = mwprototype()
     mw.registerQueue(queue)
-    mw.setParallelLimit(7)
+    mw.setParallelLimit(parallelJobsLimit)
     mw.registerFunction(handleSingleBvid )
     mw.launch()
 
-# # reset inbox queue file if switch
-# if cleanupQueueAfter:
-#     with open(inputFileName, 'w') as queue:
-#         queue.write('')
-
-# os.remove(blockfileName)
+# reset inbox queue file if switch
+if cleanupQueueAfter:
+    with open(inputFileName, 'w') as queue:
+        queue.write('')
